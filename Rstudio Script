@@ -1,0 +1,29 @@
+setwd("C:/Users/teafr/OneDrive - NTNU/Skrivbordet/AB-204")
+bears<-read.csv("bears.csv")
+install.packages("tidyverse")
+install.packages("showtext")
+install.packages("ggtext")
+library(tidyverse)
+library(showtext)
+library(ggtext)
+
+bears <- read_csv("bears.csv", show_col_types = FALSE) |>
+  rename_with(str_trim) |>                       # header has " age" with a leading space
+  mutate(
+    date = as.Date(Date, format = "%d/%m/%Y"),
+    age  = as.numeric(age),
+    `Type of bear` = str_to_title(str_trim(`Type of bear`))
+  ) |>
+  filter(!is.na(date), !is.na(age))
+
+pal <- c("Black Bear" = "black","Brown Bear" = "brown","Polar Bear" = "white")
+
+plot<-ggplot(bears,aes(date,age))+
+  geom_point(aes(color = `Type of bear`), size = 3, alpha = 1)+
+  scale_color_manual(values = pal, name = "type of bear")+
+  scale_x_date(date_breaks = "10 years", date_labels = "%Y", expand = expansion(mult = 0.03))+
+  theme(panel.background=element_rect(fill="lavender"),plot.background = element_rect(fill="lightblue"),plot.title = element_text(size = 25,color = "green",face="bold"))+
+  labs(title="Fatal bear attacks in North America since 1900",x="Year",y="age of victim :(")+
+  geom_vline(xintercept=as.Date("1973-11-15"),color="yellow",linewidth=1,linetype="longdash")+
+  annotate("label",x = as.Date("1973-11-15"), y = 100,label = "Polar bears protected from here (1973 in Canada)",hjust = 0,fill = "yellow", color = "purple",size = 3, linewidth = 0.6,label.padding = unit(0.6, "lines"))
+plot
